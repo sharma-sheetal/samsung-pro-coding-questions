@@ -1,3 +1,5 @@
+***************************************************** START ****************************************************************
+
 /*
 Q2. 
 2 arrays given
@@ -15,87 +17,62 @@ constraints -
 
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 using namespace std;
-int maxDiffD(const vector<int> &a, const vector<int> &b)
-{
-    vector<int> sa = a, sb = b;
-    sort(sa.begin(), sa.end());
-    sort(sb.begin(), sb.end());
-
-    set<int> s;
-    for (int x : sa)s.insert(x);
-    for (int x : sb)s.insert(x);
-
-    vector<int> c;
-    c.push_back(*s.begin() - 1);
-    for (int x : s)
-        c.push_back(x);
-    c.push_back(*s.rbegin() + 1);
-
-    int mx = INT_MIN, bestD = 0;
-    for (int d : c)
-    {
-        int ca = upper_bound(sa.begin(), sa.end(), d) - sa.begin();
-        int cb = upper_bound(sb.begin(), sb.end(), d) - sb.begin();
-
-        int as = ca + (sa.size() - ca) * 2;
-        int bs = cb + (sb.size() - cb) * 2;
-
-        int diff = as - bs;
-        if (diff > mx)
-        {
-            mx = diff;
-            bestD = d;
-        }
-    }
-    return bestD;
+void solve() {
+int n, m;
+// Read sizes of array A and B
+if (!(cin >> n >> m)) return;
+vector<long long> a(n), b(m);
+vector<long long> candidates;
+// D can be 0 (meaning all elements get score 2)
+candidates.push_back(0);
+for (int i = 0; i < n; i++) {
+cin >> a[i];
+candidates.push_back(a[i]);
 }
-int main()
-{
-    int t;cin >> t;
-    while (t--){
-        int n, m;cin >> n >> m;
-        vector<int> a(n), b(m);
-        for (int i = 0; i < n; i++)cin >> a[i];
-        for (int i = 0; i < m; i++)cin >> b[i];
-        cout << "Optimal D: " << maxDiffD(a, b) << endl;
-    }
-    return 0;
+for (int i = 0; i < m; i++) {
+cin >> b[i];
+candidates.push_back(b[i]);
+}
+// Sort arrays to enable O(log N) binary search lookups
+sort(a.begin(), a.end());
+sort(b.begin(), b.end());
+// Coordinate Compression: Remove duplicate candidate values
+// to avoid redundant calculations
+sort(candidates.begin(), candidates.end());
+candidates.erase(unique(candidates.begin(), candidates.end()), candidates.end());
+long long max_diff = -1e18;
+long long best_d = 0;
+long long max_score_a = -1e18; // Secondary tie-breaker
+for (long long d : candidates) {
+// upper_bound gives the number of elements strictly less than or equal to 'd'
+long long count_a = upper_bound(a.begin(), a.end(), d) - a.begin();
+long long count_b = upper_bound(b.begin(), b.end(), d) - b.begin();
+// Calculate scores based on the rule
+// elements <= D get 1 point, elements > D get 2 points
+long long score_a = count_a * 1 + (n - count_a) * 2;
+long long score_b = count_b * 1 + (m - count_b) * 2;
+long long diff = score_a - score_b;
+// If we find a strictly better difference, update.
+// If the difference is the same, pick the one that gives A a higher total score.
+if (diff > max_diff || (diff == max_diff && score_a > max_score_a)) {
+max_diff = diff;
+best_d = d;
+max_score_a = score_a;
+}
+}
+cout << best_d << "\n";
+}
+int main() {
+// Fast I/O for Competitive Programming
+ios_base::sync_with_stdio(false);
+cin.tie(NULL);
+solve();
+return 0;
 }
 
-/*
-#include <bits/stdc++.h>
-using namespace std;
 
-int main(){
-    int n; cin>>n; 
-    
-    vector<int> a(n), b(n), all;
-    
-    for(int i = 0; i<n; i++) cin>>a[i], all.push_back(a[i]);
-    for(int i = 0; i<n; i++) cin>>b[i], all.push_back(b[i]);
-    
-    int m = all.size();
-    
-    int ans = 0;
-    
-    for(int i = 0; i<m; i++){
-        int x, y;
-        int val1 = upper_bound(a.begin(), a.end(), all[i]) - a.begin();
-        int val2 = upper_bound(b.begin(), b.end(), all[i]) - b.begin();
-        
-        if(val1 == n) x = 0;
-        else x = n + 1 - val1;
-        
-        if(val2 == n) y = 0;
-        else y = n + 1 - val2;
-        
-        // cout<<all[i]<<" : "<<x<<" "<<y<<endl;
-        
-        ans = max(ans, x - y);
-    }
-    cout<<ans<<endl;
-    return 0;
-}
-*/
+********************************************************************** DONE *******************************************************
