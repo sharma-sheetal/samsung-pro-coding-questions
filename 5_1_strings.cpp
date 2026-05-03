@@ -1,3 +1,5 @@
+************************************************** START **************************************************
+
 /*Test - 5 
 Q1.
 You are given an array of strings. You can merge two strings, arr[i] and arr[j], only if,
@@ -18,72 +20,62 @@ Ans = 2 (which is the length+ of “22”)
 /*
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
 using namespace std;
-using ll = long long;
-const int mx = 1e5+1;
-vector<string>v;
+void solve() {
 int n;
-long long dp[mx][10][10];
-long long solve(int i, int st, int end){
-  if(i==n){
-    return (st==end)?0:INT_MIN;
-  }
-  if(dp[i][st][end]!=-1) return dp[i][st][end];
-  ll ans=solve(i+1, st, end);
-  if(st==end) ans=max(ans, 0LL);
-  if(v[i][0]-'0'==end) ans= max( ans, solve(i+1,st,v[i].back()-'0')+(int)v[i].size());
-  return dp[i][st][end]=ans;
+if (!(cin >> n)) return;
+vector<string> arr(n);
+for (int i = 0; i < n; i++) {
+cin >> arr[i];
 }
-int main(){
-  int t;cin>>t;
-  while(t--){
-    cin>>n;
-    v.resize(n);
-    memset(dp,-1,sizeof (dp));
-    for(int i=0;i<n;i++)cin>>v[i];
-    int ans = 0;
-    for(int i=0;i<n;i++){
-      ans=max((ll)ans,solve(i,v[i][0]-'0',v[i][0]-'0'));
-    }
-    cout<<ans<<endl;
-  }
+// dp[i][j] will store the maximum length of a merged string
+// that starts with digit 'i' and ends with digit 'j'.
+// Initialized to -1 to represent unreachable/invalid states.
+vector<vector<long long>> dp(10, vector<long long>(10, -1));
+for (int i = 0; i < n; i++) {
+string s = arr[i];
+int len = s.length();
+int first_digit = s.front() - '0';
+int last_digit = s.back() - '0';
+// We use a temporary DP table for transitions to ensure we don't
+// use the same string multiple times in a single step.
+vector<vector<long long>> next_dp = dp;
+// 1. Try to append current string 's' to existing valid sequences
+// We look for any sequence that ends with our 'first_digit'
+for (int start_digit = 0; start_digit <= 9; start_digit++) {
+if (dp[start_digit][first_digit] != -1) {
+next_dp[start_digit][last_digit] = max(
+next_dp[start_digit][last_digit],
+dp[start_digit][first_digit] + len
+);
 }
-/*
-#include <bits/stdc++.h>
-using namespace std;
-typedef long long ll;
-#define fastio ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+}
+// 2. The current string can also act as the start of a brand new sequence
+next_dp[first_digit][last_digit] = max(
+next_dp[first_digit][last_digit],
+(long long)len
+);
+// Commit the state for the next iteration
+dp = next_dp;
+}
+// The question asks for a 'final' string where the FIRST letter == LAST letter.
+// We check the diagonal of our DP table: dp[0][0], dp[1][1], ..., dp[9][9]
+long long max_ans = 0;
+for (int i = 0; i <= 9; i++) {
+if (dp[i][i] > max_ans) {
+max_ans = dp[i][i];
+}
+}
+cout << max_ans << "\n";
+}
 int main() {
-    fastio;
-    int t;
-    cin >> t;
-    while (t--) {
-        ll n;
-        cin >> n;
-        vector<string> v(n);
-        for (auto &s : v) cin >> s;
-       
-        vector<vector<ll>> mp(10, vector<ll>(10, 0));
-       
-        for (ll i = n - 1; i >= 0; i--) {
-            int first = v[i][0] - '0', last = v[i].back() - '0';
-            for (ll j = 0; j <= 9; j++) {
-                if (mp[last][j] != 0) {
-                    mp[first][j] = max(mp[first][j], mp[last][j] + (ll)v[i].length());
-                }
-            }
-            mp[first][last] = max(mp[first][last], (ll)v[i].length());
-        }
-       
-        ll res = 0;
-        for (ll i = 0; i <= 9; i++) {
-            res = max(res, mp[i][i]);
-        }
-       
-        cout << res << "\n";
-    }
-    return 0;
+// Fast I/O
+ios_base::sync_with_stdio(false);
+cin.tie(NULL);
+solve();
+return 0;
 }
-
-*/
